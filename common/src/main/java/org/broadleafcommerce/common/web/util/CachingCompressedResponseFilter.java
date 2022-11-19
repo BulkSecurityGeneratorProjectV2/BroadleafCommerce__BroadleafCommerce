@@ -45,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -322,11 +323,11 @@ public class CachingCompressedResponseFilter extends AbstractIgnorableOncePerReq
 
     protected void cacheStaticCompressedFileInFileSystem(HttpServletRequest request, HttpServletResponse response, FilterChain chain, File targetFile) throws IOException, ServletException {
         String tempRoot = UUID.randomUUID().toString();
-        File tempFile = File.createTempFile(tempRoot, ".tmp");
+        File tempFile = Files.createTempFile(tempRoot, ".tmp").toFile();
         FileSystemResponseWrapper wrapper = new FileSystemResponseWrapper(response, tempFile);
         chain.doFilter(request, wrapper);
         wrapper.closeFileOutputStream();
-        File compressedFile = File.createTempFile(tempRoot, ".tmpgz");
+        File compressedFile = Files.createTempFile(tempRoot, ".tmpgz").toFile();
         OutputStream compressedOut = new GZIPOutputStream(new FileOutputStream(compressedFile));
         StreamUtils.copy(new BufferedInputStream(new FileInputStream(tempFile)), compressedOut);
         IOUtils.closeQuietly(compressedOut);
